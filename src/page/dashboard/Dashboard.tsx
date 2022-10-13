@@ -14,17 +14,20 @@ interface IFood {
 }
 
 export const Dashboard: React.FC = () => {
-  const [isAvailable, setIsAvailable] = useState(true);
   const [foodProps, setFoodProps] = useState<IFood[]>([]);
 
   useEffect(() => {
-    Api.get("http://localhost:3001/foods").then(result => {
+    Api.get("/foods").then(result => {
       setFoodProps(result.data);
     });
   }, [setFoodProps]);
 
   const handleDelete = async (id: number) => {
+    await Api.delete(`/foods/${id}`);
 
+    setFoodProps(oldFoods => [
+      ...oldFoods.filter(oldFood => oldFood.id !== id)
+    ]);
   };
 
   const handleEdit = (food: IFood) => {
@@ -32,10 +35,15 @@ export const Dashboard: React.FC = () => {
   };
 
   const toggleAvailable = async (id: number) => {
+    const updatedAvailable = [...foodProps];
+    const foodExists = updatedAvailable.find((food) => food.id === id);
+
     await Api.put(`/foods/${id}`, {
-      ...foodProps,
-      available: !isAvailable,
+      ...foodExists,
+      available: !foodExists?.available,
     });
+
+    setFoodProps(updatedAvailable);
   };
 
   return (
@@ -44,7 +52,7 @@ export const Dashboard: React.FC = () => {
 
       <FoodsContainer data-testid="foods-list">
         {foodProps.map(food => (
-          <Container key={food.id} available={isAvailable}>
+          <Container key={food.id} available={food.available}>
             <header>
               <img src={food.image} alt={food.name} />
             </header>
@@ -77,13 +85,13 @@ export const Dashboard: React.FC = () => {
               </div>
 
               <div className="availability-container">
-                <p>{isAvailable ? 'Disponível' : 'Indisponível'}</p>
+                <p>{food.available ? 'Disponível' : 'Indisponível'}</p>
 
                 <label htmlFor={`available-switch-${food.id}`} className="switch">
                   <input
                     id={`available-switch-${food.id}`}
                     type="checkbox"
-                    checked={isAvailable}
+                    checked={food.available}
                     onChange={() => toggleAvailable(food.id)}
                     data-testid={`change-status-food-${food.id}`}
                   />
