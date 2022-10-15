@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FiEdit3, FiTrash } from 'react-icons/fi';
 import { Header } from "../../components/header/Header";
+import { ModalAddFood } from "../../components/modal-add-food/ModalAddFood";
 import { Api } from "../../service/Api";
 import { Container, FoodsContainer } from "./Style";
 
@@ -15,12 +16,21 @@ interface IFood {
 
 export const Dashboard: React.FC = () => {
   const [foodProps, setFoodProps] = useState<IFood[]>([]);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   useEffect(() => {
     Api.get("/foods").then(result => {
       setFoodProps(result.data);
     });
   }, [setFoodProps]);
+
+  const toggleModal = () => {
+    setIsOpenModal(true);
+  };
+
+  const onRequestModal = () => {
+    setIsOpenModal(false);
+  };
 
   const handleDelete = async (id: number) => {
     await Api.delete(`/foods/${id}`);
@@ -38,17 +48,30 @@ export const Dashboard: React.FC = () => {
     const updatedAvailable = [...foodProps];
     const foodExists = updatedAvailable.find((food) => food.id === id);
 
-    await Api.put(`/foods/${id}`, {
+    const response = await Api.put(`/foods/${id}`, {
       ...foodExists,
       available: !foodExists?.available,
     });
 
-    setFoodProps(updatedAvailable);
+    const newState = foodProps.map(food => {
+      if (food.id === id) {
+        return response.data;
+      } else {
+        return food;
+      }
+    })
+
+    setFoodProps(newState);
   };
 
   return (
     <>
-      <Header openModal={() => console.log("Oi")} />
+      <Header openModal={toggleModal} />
+
+      <ModalAddFood
+        isOpen={isOpenModal}
+        setIsOpen={onRequestModal}
+      />
 
       <FoodsContainer data-testid="foods-list">
         {foodProps.map(food => (
