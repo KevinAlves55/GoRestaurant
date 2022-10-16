@@ -1,13 +1,14 @@
-import { FormEvent, useRef } from 'react';
+import { useRef } from 'react';
 import { FiCheckSquare } from 'react-icons/fi';
+import { FormHandles } from '@unform/core';
 
 import { Form } from './Style';
 import { Modal } from '../modal/Modal';
 import { Input } from '../input/Input';
-import { FormHandles } from '@unform/core';
-import { Api } from '../../service/Api';
+import { useFood } from '../../hooks/useFoods';
 
-interface IFoodProps {
+interface food {
+  id: number,
   name: string,
   description: string,
   price: string,
@@ -21,13 +22,12 @@ interface IModalAddFoodProps {
 }
 
 export const ModalAddFood: React.FC<IModalAddFoodProps> = ({ isOpen, setIsOpen }) => {
+  const { createFood } = useFood();
   const formRef = useRef<FormHandles>(null);
 
   const handleCreateNewFood = async () => {
     const dados = formRef.current?.getData();
-    const response = await Api.post<IFoodProps>("/foods", dados);
-
-    console.log(response);
+    await createFood(dados);
   };
 
   return (
