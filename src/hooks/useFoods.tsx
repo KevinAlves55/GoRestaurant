@@ -1,86 +1,69 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { Api } from "../service/Api";
+export { };
 
-interface Food {
-  id: number,
-  name: string,
-  description: string,
-  price: string,
-  available: boolean,
-  image: string
-}
+// import { createContext, useContext, useEffect, useState } from "react";
+// import { Api } from "../service/Api";
 
-interface FoodContextData {
-  food: Food[];
-  createFood: (dados: Omit<Food, "id">) => Promise<void>;
-  toggleAvailable: (id: number) => void;
-  handleDelete: (id: number) => void;
-}
+// interface Food {
+//   id: number,
+//   name: string,
+//   description: string,
+//   price: string,
+//   available: boolean,
+//   image: string
+// }
 
-const FoodContext = createContext({} as FoodContextData);
+// interface FoodContextData {
+//   food: Food[];
+//   createFood: (dados: Omit<Food, "id">) => Promise<void>;
+//   handleDelete: (id: number) => void;
+// }
 
-interface IFoodProviderProps {
-  children: React.ReactNode;
-}
+// const FoodContext = createContext({} as FoodContextData);
 
-export const FoodProvider: React.FC<IFoodProviderProps> = ({ children }) => {
-  const [food, setFood] = useState<Food[]>([]);
+// interface IFoodProviderProps {
+//   children: React.ReactNode;
+// }
 
-  useEffect(() => {
-    Api.get("/foods").then(result => {
-      setFood(result.data);
-    });
-  }, []);
+// export const FoodProvider: React.FC<IFoodProviderProps> = ({ children }) => {
+//   const [food, setFood] = useState<Food[]>([]);
 
-  const createFood = async (dados: Omit<Food, "id">) => {
-    const response = await Api.post("/foods", {
-      dados
-    });
+//   useEffect(() => {
+//     Api.get("/foods").then(result => {
+//       setFood(result.data);
+//     });
+//   }, []);
 
-    const { food } = response.data;
+//   const createFood = async (dados: Omit<Food, "id">) => {
+//     const response = await Api.post("/foods", {
+//       dados
+//     });
 
-    setFood([
-      ...food,
-      food
-    ]);
-  };
+//     console.log(dados);
 
-  const toggleAvailable = async (id: number) => {
-    const updatedAvailable = [...food];
-    const foodExists = updatedAvailable.find((food) => food.id === id);
+//     const { food } = response.data;
 
-    const response = await Api.put(`/foods/${id}`, {
-      ...foodExists,
-      available: !foodExists?.available,
-    });
+//     setFood([
+//       ...food,
+//       food
+//     ]);
+//   };
 
-    const newState = food.map(food => {
-      if (food.id === id) {
-        return response.data;
-      } else {
-        return food;
-      }
-    })
+//   const handleDelete = async (id: number) => {
+//     await Api.delete(`/foods/${id}`);
 
-    setFood(newState);
-  };
+//     setFood(oldFoods => [
+//       ...oldFoods.filter(oldFood => oldFood.id !== id)
+//     ]);
+//   };
 
-  const handleDelete = async (id: number) => {
-    await Api.delete(`/foods/${id}`);
+//   return (
+//     <FoodContext.Provider value={{ food, createFood, handleDelete }}>
+//       {children}
+//     </FoodContext.Provider>
+//   );
+// };
 
-    setFood(oldFoods => [
-      ...oldFoods.filter(oldFood => oldFood.id !== id)
-    ]);
-  };
-
-  return (
-    <FoodContext.Provider value={{ food, toggleAvailable, createFood, handleDelete }}>
-      {children}
-    </FoodContext.Provider>
-  );
-};
-
-export const useFood = () => {
-  const context = useContext(FoodContext);
-  return context;
-};
+// export const useFood = () => {
+//   const context = useContext(FoodContext);
+//   return context;
+// };

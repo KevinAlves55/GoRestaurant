@@ -1,38 +1,36 @@
 import { useRef } from 'react';
 import { FiCheckSquare } from 'react-icons/fi';
-import { FormHandles } from '@unform/core';
 
 import { Form } from './Style';
 import { Modal } from '../modal/Modal';
 import { Input } from '../input/Input';
-import { useFood } from '../../hooks/useFoods';
+import { FormHandles } from '@unform/core';
 
-interface food {
-  id: number,
-  name: string,
-  description: string,
-  price: string,
-  available: boolean,
-  image: string
+interface AddFood {
+  image: string;
+  name: string;
+  price: string;
+  description: string;
 }
 
-interface IModalAddFoodProps {
+interface ModalAddFoodProps {
   isOpen: boolean;
   setIsOpen: () => void;
+  handleAddFood: (data: AddFood) => void
 }
 
-export const ModalAddFood: React.FC<IModalAddFoodProps> = ({ isOpen, setIsOpen }) => {
-  const { createFood } = useFood();
+
+export const ModalAddFood: React.FC<ModalAddFoodProps> = ({ isOpen, setIsOpen, handleAddFood }) => {
   const formRef = useRef<FormHandles>(null);
 
-  const handleCreateNewFood = async () => {
-    const dados = formRef.current?.getData();
-    await createFood(dados);
+  const handleSubmit = async (data: AddFood) => {
+    handleAddFood(data);
+    setIsOpen();
   };
 
   return (
-    <Modal modalStatus={isOpen} setIsOpen={setIsOpen}>
-      <Form ref={formRef} onSubmit={handleCreateNewFood}>
+    <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
+      <Form ref={formRef} onSubmit={handleSubmit}>
         <h1>Novo Prato</h1>
         <Input name="image" placeholder="Cole o link aqui" />
 
@@ -49,4 +47,4 @@ export const ModalAddFood: React.FC<IModalAddFoodProps> = ({ isOpen, setIsOpen }
       </Form>
     </Modal>
   );
-};
+}

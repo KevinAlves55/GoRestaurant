@@ -1,7 +1,9 @@
 import { Container } from "./Style";
 import { FiEdit3, FiTrash } from 'react-icons/fi';
+import { useState } from "react";
+import { Api } from "../../service/Api";
 
-interface food {
+interface IFood {
   id: number,
   name: string,
   description: string,
@@ -11,21 +13,26 @@ interface food {
 }
 
 interface IFoodProps {
-  food: {
-    id: number,
-    name: string,
-    description: string,
-    price: string,
-    available: boolean,
-    image: string
-  },
+  food: IFood,
+  handleEditFood: (food: IFood) => void;
   handleDelete: (id: number) => void;
-  toggleAvailable: (id: number) => void;
 }
 
-export const Food: React.FC<IFoodProps> = ({ food, handleDelete, toggleAvailable }) => {
+export const Food: React.FC<IFoodProps> = ({ food, handleDelete, handleEditFood }) => {
+  const { available } = food;
+  const [isAvailable, setIsAvailable] = useState(available);
+
+  const toggleAvailable = async (id: number) => {
+    await Api.put(`/foods/${id}`, {
+      ...food,
+      available: !isAvailable,
+    });
+
+    setIsAvailable(!isAvailable);
+  };
+
   return (
-    <Container key={food.id} available={food.available}>
+    <Container key={food.id} available={isAvailable}>
       <header>
         <img src={food.image} alt={food.name} />
       </header>
@@ -41,7 +48,7 @@ export const Food: React.FC<IFoodProps> = ({ food, handleDelete, toggleAvailable
           <button
             type="button"
             className="icon"
-            onClick={() => console.log("Clicou em Editar")}
+            onClick={() => handleEditFood(food)}
             data-testid={`edit-food-${food.id}`}
           >
             <FiEdit3 size={20} />
@@ -58,13 +65,13 @@ export const Food: React.FC<IFoodProps> = ({ food, handleDelete, toggleAvailable
         </div>
 
         <div className="availability-container">
-          <p>{food.available ? 'Disponível' : 'Indisponível'}</p>
+          <p>{isAvailable ? 'Disponível' : 'Indisponível'}</p>
 
           <label htmlFor={`available-switch-${food.id}`} className="switch">
             <input
               id={`available-switch-${food.id}`}
               type="checkbox"
-              checked={food.available}
+              checked={isAvailable}
               onChange={() => toggleAvailable(food.id)}
               data-testid={`change-status-food-${food.id}`}
             />
